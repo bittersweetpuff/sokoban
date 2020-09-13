@@ -1,3 +1,3 @@
-#Sokoban
+# Sokoban
 
-Rust implementation of sokoban game. 
+Rust implementation of sokoban game.
