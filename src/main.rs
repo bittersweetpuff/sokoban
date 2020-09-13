@@ -5,20 +5,22 @@ use ggez::filesystem;
 use ggez::nalgebra as na;
 
 use std::env;
-use std::io;
 use std::path;
 
+mod map;
+pub use map::*;
 
-const tile_x:i32 = 32;
-const tile_y:i32 = 32;
+
+
 
 struct MainState {
     pos_x: f32,
+    map: map::Map,
 }
 
 impl MainState {
     fn new() -> ggez::GameResult<MainState> {
-        let s = MainState { pos_x: 0.0 };
+        let s = MainState { pos_x: 0.0, map: map::new_test_map() };
         Ok(s)
     }
 }
@@ -30,27 +32,20 @@ impl event::EventHandler for MainState {
     }
 
     fn draw(&mut self, ctx: &mut ggez::Context) -> ggez::GameResult {
-        graphics::clear(ctx, [0.1, 0.2, 0.3, 1.0].into());
-
-        let circle = graphics::Mesh::new_circle(
-            ctx,
-            graphics::DrawMode::fill(),
-            na::Point2::new(self.pos_x, 380.0),
-            100.0,
-            2.0,
-            graphics::WHITE,
-        )?;
-
-        let wall = graphics::Image::new(ctx, path::Path::new("/player.png"))?;
-        graphics::draw(ctx, &wall, (na::Point2::new(self.pos_x, 380.0),))?;
-
-        graphics::present(ctx)?;
-        Ok(())
+        map::draw_map(&self.map, ctx)
     }
 }
 
 pub fn main() -> ggez::GameResult { 
-    let mut cb = ggez::ContextBuilder::new("super_simple", "ggez");
+    let mut cb = ggez::ContextBuilder::new("Sokoban", "BittersweetPuff");
+    let ws = ggez::conf::WindowSetup {
+        title: "Sokoban".to_owned(),
+        samples: ggez::conf::NumSamples::Zero,
+        vsync: true,
+        icon: "".to_owned(),
+        srgb: true,
+    };
+    cb = cb.window_setup(ws);
    
     if let Ok(manifest_dir) = env::var("CARGO_MANIFEST_DIR") {
         let mut path = path::PathBuf::from(manifest_dir);
@@ -62,14 +57,7 @@ pub fn main() -> ggez::GameResult {
 
 
     let (ctx, event_loop) = &mut cb.build()?;
-    println!("Full filesystem info: {:#?}", ctx.filesystem);
 
-
-    let dir_contents: Vec<_> = filesystem::read_dir(ctx, "/")?.collect();
-    println!("Directory has {} things in it:", dir_contents.len());
-    for itm in dir_contents {
-        println!("   {:?}", itm);
-    }
     let state = &mut MainState::new()?;
     event::run(ctx, event_loop, state)
 }
