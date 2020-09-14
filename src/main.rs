@@ -20,7 +20,7 @@ struct MainState {
 
 impl MainState {
     fn new() -> ggez::GameResult<MainState> {
-        let s = MainState { pos_x: 0.0, map: map::new_test_map() };
+        let s = MainState { pos_x: 0.0, map: map::test_map_from_template() };
         Ok(s)
     }
 }

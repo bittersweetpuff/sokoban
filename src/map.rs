@@ -18,7 +18,7 @@ pub enum TileType {
     Floor,
 }
 
-struct TemplateMap {
+pub struct TemplateMap {
     pub tiles: Vec<char>,
     pub width: i32,
     pub height: i32,
@@ -65,6 +65,43 @@ pub fn new_test_map() -> Map {
     map
 }
 
+pub fn map_from_template(template: TemplateMap) -> Map {
+    let mapcount = template.width * template.height;
+    let mut map = Map {
+        tiles: vec![TileType::Floor; mapcount as usize],
+        height: template.height,
+        width: template.width
+    };
+
+    for (idx, glyph) in template.tiles.iter().enumerate() {
+        let tile: TileType;
+        match glyph {
+            '.' => {
+                tile = TileType::Floor;
+            },
+            '#' => {
+                tile = TileType::Wall;
+            }
+            _ => {
+                tile = TileType::Chest;
+            }
+        }
+        map.tiles[idx] = tile;
+    }
+    
+    map
+}
+
+pub fn test_map_from_template() -> Map {
+    let template = TemplateMap {
+        height: 2,
+        width: 2,
+        tiles: ['#', '#', '#', '.'].to_vec()
+    };
+
+    map_from_template(template)
+}
+
 pub fn draw_map(map: &Map, ctx: &mut ggez::Context) -> ggez::GameResult {
     let floor = graphics::Image::new(ctx, path::Path::new("/ground.png"))?;
     let wall = graphics::Image::new(ctx, path::Path::new("/wall.png"))?;
@@ -89,7 +126,7 @@ pub fn draw_map(map: &Map, ctx: &mut ggez::Context) -> ggez::GameResult {
             }
         }
         x += 1.0;
-        if x > (MAPWIDTH as f32) - 1.0 {
+        if x > (map.width as f32) - 1.0 {
             x = 0.0;
             y += 1.0;
         }
