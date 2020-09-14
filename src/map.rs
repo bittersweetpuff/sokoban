@@ -18,6 +18,12 @@ pub enum TileType {
     Floor,
 }
 
+struct TemplateMap {
+    pub tiles: Vec<char>,
+    pub width: i32,
+    pub height: i32,
+}
+
 pub struct Map {
     pub tiles: Vec<TileType>,
     pub width: i32,
