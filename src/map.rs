@@ -100,11 +100,7 @@ pub fn map_from_template(template: template_map::TemplateMap) -> Map {
 }
 
 pub fn test_map_from_template() -> Map {
-    let template = template_map::TemplateMap {
-        height: 9,
-        width: 9,
-        tiles: String::from("##########.......##.x...x.##.......##.o...o.##.......##.......##...@...##########")
-    };
+    let template = template_map::load_from_file();
 
     map_from_template(template)
 }

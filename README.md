@@ -4,7 +4,7 @@ Rust implementation of sokoban game.
 
 ## Short term todo list:
 
-* Load map from file
+* Checking if loaded map is valid
 * Player movement
 * Crates interactions
 * ESC maybe
@@ -16,3 +16,4 @@ Rust implementation of sokoban game.
 
 * Basic map drawing
 * Placeholder assets
+* Reading from file
