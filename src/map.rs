@@ -3,6 +3,8 @@ use ggez::nalgebra as na;
 
 use std::path;
 
+use super::template_map;
+
 
 pub const MAPWIDTH: usize = 16;
 pub const MAPHEIGHT: usize = 16;
@@ -18,11 +20,7 @@ pub enum TileType {
     Floor,
 }
 
-pub struct TemplateMap {
-    pub tiles: Vec<char>,
-    pub width: i32,
-    pub height: i32,
-}
+
 
 pub struct Map {
     pub tiles: Vec<TileType>,
@@ -65,7 +63,7 @@ pub fn new_test_map() -> Map {
     map
 }
 
-pub fn map_from_template(template: TemplateMap) -> Map {
+pub fn map_from_template(template: template_map::TemplateMap) -> Map {
     let mapcount = template.width * template.height;
     let mut map = Map {
         tiles: vec![TileType::Floor; mapcount as usize],
@@ -73,7 +71,7 @@ pub fn map_from_template(template: TemplateMap) -> Map {
         width: template.width
     };
 
-    for (idx, glyph) in template.tiles.iter().enumerate() {
+    for (idx, glyph) in template.tiles.chars().enumerate() {
         let tile: TileType;
         match glyph {
             '.' => {
@@ -82,8 +80,17 @@ pub fn map_from_template(template: TemplateMap) -> Map {
             '#' => {
                 tile = TileType::Wall;
             }
-            _ => {
+            'x' => {
+                tile = TileType::Target;
+            }
+            '@' => {
+                tile = TileType::Player;
+            }
+            'o' => {
                 tile = TileType::Chest;
+            }
+            _ => {
+                tile = TileType::Floor;
             }
         }
         map.tiles[idx] = tile;
@@ -93,19 +100,21 @@ pub fn map_from_template(template: TemplateMap) -> Map {
 }
 
 pub fn test_map_from_template() -> Map {
-    let template = TemplateMap {
-        height: 2,
-        width: 2,
-        tiles: ['#', '#', '#', '.'].to_vec()
+    let template = template_map::TemplateMap {
+        height: 9,
+        width: 9,
+        tiles: String::from("##########.......##.x...x.##.......##.o...o.##.......##.......##...@...##########")
     };
 
     map_from_template(template)
 }
 
 pub fn draw_map(map: &Map, ctx: &mut ggez::Context) -> ggez::GameResult {
-    let floor = graphics::Image::new(ctx, path::Path::new("/ground.png"))?;
+    let floor = graphics::Image::new(ctx, path::Path::new("/floor.png"))?;
     let wall = graphics::Image::new(ctx, path::Path::new("/wall.png"))?;
     let player = graphics::Image::new(ctx, path::Path::new("/player.png"))?;
+    let target = graphics::Image::new(ctx, path::Path::new("/target.png"))?;
+    let chest = graphics::Image::new(ctx, path::Path::new("/chest.png"))?;
     graphics::clear(ctx, [0.1, 0.2, 0.3, 1.0].into());
     let mut y = 0.0;
     let mut x = 0.0;
@@ -114,15 +123,17 @@ pub fn draw_map(map: &Map, ctx: &mut ggez::Context) -> ggez::GameResult {
             TileType::Floor => {
                 graphics::draw(ctx, &floor, (na::Point2::new(x*(TILESIZE as f32), y*(TILESIZE as f32)),));
             }
-
             TileType::Wall => {
                 graphics::draw(ctx, &wall, (na::Point2::new(x*(TILESIZE as f32), y*(TILESIZE as f32)),));
             }
             TileType::Player => {
                 graphics::draw(ctx, &player, (na::Point2::new(x*(TILESIZE as f32), y*(TILESIZE as f32)),));
             }
-            _ => {
-
+            TileType::Chest => {
+                graphics::draw(ctx, &chest, (na::Point2::new(x*(TILESIZE as f32), y*(TILESIZE as f32)),));
+            }
+            TileType::Target => {
+                graphics::draw(ctx, &target, (na::Point2::new(x*(TILESIZE as f32), y*(TILESIZE as f32)),));
             }
         }
         x += 1.0;

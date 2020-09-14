@@ -10,6 +10,9 @@ use std::path;
 mod map;
 pub use map::*;
 
+mod template_map;
+pub use template_map::*;
+
 
 
 
