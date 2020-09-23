@@ -7,7 +7,7 @@ Rust implementation of sokoban game.
 * Checking if loaded map is valid
 * Player movement
 * Crates interactions
-* ESC maybe
+* ECS maybe
 * Fix window size
 * Camera movement for bigger maps
 * Resize assets maybe?

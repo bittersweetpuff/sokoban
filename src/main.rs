@@ -1,8 +1,11 @@
 use ggez;
 use ggez::event;
-use ggez::graphics;
 use ggez::filesystem;
+use ggez::graphics;
 use ggez::nalgebra as na;
+
+use specs::prelude::*;
+use specs_derive;
 
 use std::env;
 use std::path;
@@ -13,33 +16,30 @@ pub use map::*;
 mod template_map;
 pub use template_map::*;
 
-
-
-
 struct MainState {
-    pos_x: f32,
-    map: map::Map,
+    pub ecs: World,
 }
 
 impl MainState {
     fn new() -> ggez::GameResult<MainState> {
-        let s = MainState { pos_x: 0.0, map: map::test_map_from_template() };
+        let mut s = MainState { ecs: World::new() };
+        let map = map::test_map_from_template();
+        s.ecs.insert(map);
         Ok(s)
     }
 }
 
 impl event::EventHandler for MainState {
     fn update(&mut self, _ctx: &mut ggez::Context) -> ggez::GameResult {
-        self.pos_x = self.pos_x % 800.0 + 1.0;
         Ok(())
     }
 
     fn draw(&mut self, ctx: &mut ggez::Context) -> ggez::GameResult {
-        map::draw_map(&self.map, ctx)
+        map::draw_map(&self.ecs, ctx)
     }
 }
 
-pub fn main() -> ggez::GameResult { 
+pub fn main() -> ggez::GameResult {
     let mut cb = ggez::ContextBuilder::new("Sokoban", "BittersweetPuff");
     let ws = ggez::conf::WindowSetup {
         title: "Sokoban".to_owned(),
@@ -49,15 +49,13 @@ pub fn main() -> ggez::GameResult {
         srgb: true,
     };
     cb = cb.window_setup(ws);
-   
+
     if let Ok(manifest_dir) = env::var("CARGO_MANIFEST_DIR") {
         let mut path = path::PathBuf::from(manifest_dir);
         path.push("resources");
         println!("Adding path {:?}", path);
         cb = cb.add_resource_path(path);
     }
-
-
 
     let (ctx, event_loop) = &mut cb.build()?;
 

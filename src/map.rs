@@ -5,6 +5,7 @@ use std::path;
 
 use super::template_map;
 
+use specs::prelude::*;
 
 pub const MAPWIDTH: usize = 16;
 pub const MAPHEIGHT: usize = 16;
@@ -14,13 +15,11 @@ pub const TILESIZE: i32 = 32;
 #[derive(Clone, Copy)]
 pub enum TileType {
     Wall,
-    Player, 
+    Player,
     Target,
     Chest,
     Floor,
 }
-
-
 
 pub struct Map {
     pub tiles: Vec<TileType>,
@@ -36,9 +35,9 @@ impl Map {
     fn apply_border_walls(&mut self) {
         let mut y = 0;
         let mut x = 0;
-        for y in 0..= self.height - 1  {
-            for x in 0..= self.width - 1 {
-                if (x == 0 || x == self.width -1) || (y == 0 || y == self.height - 1){
+        for y in 0..=self.height - 1 {
+            for x in 0..=self.width - 1 {
+                if (x == 0 || x == self.width - 1) || (y == 0 || y == self.height - 1) {
                     let idx = self.xy_idx(x, y);
                     self.tiles[idx] = TileType::Wall;
                 }
@@ -47,7 +46,7 @@ impl Map {
     }
 
     fn apply_player(&mut self) {
-        let idx = self.xy_idx(self.width/2, self.height/2);
+        let idx = self.xy_idx(self.width / 2, self.height / 2);
         self.tiles[idx] = TileType::Player;
     }
 }
@@ -68,7 +67,7 @@ pub fn map_from_template(template: template_map::TemplateMap) -> Map {
     let mut map = Map {
         tiles: vec![TileType::Floor; mapcount as usize],
         height: template.height,
-        width: template.width
+        width: template.width,
     };
 
     for (idx, glyph) in template.tiles.chars().enumerate() {
@@ -76,7 +75,7 @@ pub fn map_from_template(template: template_map::TemplateMap) -> Map {
         match glyph {
             '.' => {
                 tile = TileType::Floor;
-            },
+            }
             '#' => {
                 tile = TileType::Wall;
             }
@@ -95,7 +94,7 @@ pub fn map_from_template(template: template_map::TemplateMap) -> Map {
         }
         map.tiles[idx] = tile;
     }
-    
+
     map
 }
 
@@ -105,7 +104,7 @@ pub fn test_map_from_template() -> Map {
     map_from_template(template)
 }
 
-pub fn draw_map(map: &Map, ctx: &mut ggez::Context) -> ggez::GameResult {
+pub fn draw_map(ecs: &World, ctx: &mut ggez::Context) -> ggez::GameResult {
     let floor = graphics::Image::new(ctx, path::Path::new("/floor.png"))?;
     let wall = graphics::Image::new(ctx, path::Path::new("/wall.png"))?;
     let player = graphics::Image::new(ctx, path::Path::new("/player.png"))?;
@@ -114,22 +113,58 @@ pub fn draw_map(map: &Map, ctx: &mut ggez::Context) -> ggez::GameResult {
     graphics::clear(ctx, [0.1, 0.2, 0.3, 1.0].into());
     let mut y = 0.0;
     let mut x = 0.0;
+    let map = ecs.fetch::<Map>();
     for (idx, tile) in map.tiles.iter().enumerate() {
         match tile {
             TileType::Floor => {
-                graphics::draw(ctx, &floor, (na::Point2::new(x*(TILESIZE as f32), y*(TILESIZE as f32)),));
+                graphics::draw(
+                    ctx,
+                    &floor,
+                    (na::Point2::new(
+                        x * (TILESIZE as f32),
+                        y * (TILESIZE as f32),
+                    ),),
+                );
             }
             TileType::Wall => {
-                graphics::draw(ctx, &wall, (na::Point2::new(x*(TILESIZE as f32), y*(TILESIZE as f32)),));
+                graphics::draw(
+                    ctx,
+                    &wall,
+                    (na::Point2::new(
+                        x * (TILESIZE as f32),
+                        y * (TILESIZE as f32),
+                    ),),
+                );
             }
             TileType::Player => {
-                graphics::draw(ctx, &player, (na::Point2::new(x*(TILESIZE as f32), y*(TILESIZE as f32)),));
+                graphics::draw(
+                    ctx,
+                    &player,
+                    (na::Point2::new(
+                        x * (TILESIZE as f32),
+                        y * (TILESIZE as f32),
+                    ),),
+                );
             }
             TileType::Chest => {
-                graphics::draw(ctx, &chest, (na::Point2::new(x*(TILESIZE as f32), y*(TILESIZE as f32)),));
+                graphics::draw(
+                    ctx,
+                    &chest,
+                    (na::Point2::new(
+                        x * (TILESIZE as f32),
+                        y * (TILESIZE as f32),
+                    ),),
+                );
             }
             TileType::Target => {
-                graphics::draw(ctx, &target, (na::Point2::new(x*(TILESIZE as f32), y*(TILESIZE as f32)),));
+                graphics::draw(
+                    ctx,
+                    &target,
+                    (na::Point2::new(
+                        x * (TILESIZE as f32),
+                        y * (TILESIZE as f32),
+                    ),),
+                );
             }
         }
         x += 1.0;
@@ -141,5 +176,4 @@ pub fn draw_map(map: &Map, ctx: &mut ggez::Context) -> ggez::GameResult {
 
     graphics::present(ctx)?;
     Ok(())
-
 }
